@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: shipper-onboarding-api
+  name: workload
   namespace: openshift-gitops
 spec:
   generators:
     - list:
         elements:
-          - name: shipper-onboarding-api-dev
-            namespace: shipper-dev
+          - name: workload-dev
+            namespace: workload-dev
             path: apps/workload/overlays/dev
   template:
     metadata:
@@ -33,14 +33,14 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: shipper-onboarding-api-prod
+  name: workload-prod
   namespace: openshift-gitops
 spec:
   generators:
     - list:
         elements:
-          - name: shipper-onboarding-api-prod
-            namespace: shipper-prod
+          - name: workload-prod
+            namespace: workload-prod
             path: apps/workload/overlays/prod
   template:
     metadata:

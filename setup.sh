@@ -93,11 +93,11 @@ Setup completed.
 確認コマンド:
   oc get applications -n openshift-gitops
   oc get applicationsets -n openshift-gitops
-  oc get pods -n shipper-dev
-  oc get route -n shipper-dev
+  oc get pods -n workload-dev
+  oc get route -n workload-dev
 
 Route URL 確認:
-  oc get route shipper-onboarding-api -n shipper-dev -o jsonpath='https://{.spec.host}{"\n"}'
+  oc get route workload -n workload-dev -o jsonpath='https://{.spec.host}{"\n"}'
 
 private repo の場合:
   bootstrap/repo-creds.example.yaml をコピーして値を編集し、手動で oc apply してください。

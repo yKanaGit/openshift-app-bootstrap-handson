@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: shipper-onboarding-api-config
+  name: workload-config
   labels:
-    app: shipper-onboarding-api
-    app.kubernetes.io/name: shipper-onboarding-api
+    app: workload
+    app.kubernetes.io/name: workload
     app.kubernetes.io/part-of: logistics-platform
 data:
-  APP_NAME: shipper-onboarding-api
+  APP_NAME: workload
   APP_ENV: default
   LOG_LEVEL: info

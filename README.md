@@ -2,7 +2,7 @@
 
 このリポジトリは、OpenShift GitOps / Argo CD ApplicationSet と Kustomize を使って、通常の OpenShift コンテナアプリをブートストラップ配備するためのハンズオン用リポジトリです。
 
-題材は `shipper-onboarding-api` ですが、初期状態ではすぐ動作確認できるように public image の `quay.io/openshift/origin-hello-openshift:latest` を配備します。PostgreSQL、Tekton CI/CD、OpenShift AI、GPU Operator、NFD、LLM Serving、VLM Serving、OpenWebUI 関連の manifest は含めていません。
+題材は汎用的な `workload` です。初期状態ではすぐ動作確認できるように public image の `quay.io/openshift/origin-hello-openshift:latest` を配備します。PostgreSQL、Tekton CI/CD、OpenShift AI、GPU Operator、NFD、LLM Serving、VLM Serving、OpenWebUI 関連の manifest は含めていません。
 
 ## アーキテクチャ
 
@@ -14,9 +14,9 @@ GitHub repository
 OpenShift GitOps / Argo CD
   |
   | ApplicationSet list generator
-  +--> Application: shipper-onboarding-api-dev  -> apps/.../overlays/dev  -> namespace shipper-dev
+  +--> Application: workload-dev  -> apps/workload/overlays/dev  -> namespace workload-dev
   |
-  +--> Application: shipper-onboarding-api-prod -> apps/.../overlays/prod -> namespace shipper-prod
+  +--> Application: workload-prod -> apps/workload/overlays/prod -> namespace workload-prod
        (prod は手動同期を想定)
 
 Kustomize overlay
@@ -76,22 +76,22 @@ chmod +x setup.sh
 ```bash
 oc get applications -n openshift-gitops
 oc get applicationsets -n openshift-gitops
-oc get pods -n shipper-dev
-oc get route -n shipper-dev
+oc get pods -n workload-dev
+oc get route -n workload-dev
 ```
 
 Route URL は次のコマンドで確認できます。
 
 ```bash
-oc get route shipper-onboarding-api -n shipper-dev -o jsonpath='https://{.spec.host}{"\n"}'
+oc get route workload -n workload-dev -o jsonpath='https://{.spec.host}{"\n"}'
 ```
 
 取得した URL にアクセスすると、初期 image の hello-openshift アプリに到達できます。
 
-`shipper-onboarding-api-dev` が `OutOfSync / Missing` のまま Pod が作成されない場合は、Application に automated sync が入っているか確認します。
+`workload-dev` が `OutOfSync / Missing` のまま Pod が作成されない場合は、Application に automated sync が入っているか確認します。
 
 ```bash
-oc get application shipper-onboarding-api-dev -n openshift-gitops -o jsonpath='{.spec.syncPolicy}{"\n"}'
+oc get application workload-dev -n openshift-gitops -o jsonpath='{.spec.syncPolicy}{"\n"}'
 ```
 
 空の場合は、最新の `bootstrap/applicationset.yaml` を push したうえで再適用します。
@@ -101,14 +101,14 @@ oc apply -f bootstrap/argocd-app-rbac.yaml
 oc apply -f bootstrap/applicationset.yaml
 ```
 
-`operationState.message` に `cannot create resource "deployments"` や `cannot create resource "routes"` が出る場合も、`bootstrap/argocd-app-rbac.yaml` を適用してください。これは OpenShift GitOps の application-controller に `shipper-dev` / `shipper-prod` への配備権限を渡すための RoleBinding です。
+`operationState.message` に `cannot create resource "deployments"` や `cannot create resource "routes"` が出る場合も、`bootstrap/argocd-app-rbac.yaml` を適用してください。これは OpenShift GitOps の application-controller に `workload-dev` / `workload-prod` への配備権限を渡すための RoleBinding です。
 
 ## dev / prod の違い
 
 | 環境 | Application 名 | namespace | replicas | APP_ENV | LOG_LEVEL | 同期方式 |
 | --- | --- | --- | ---: | --- | --- | --- |
-| dev | `shipper-onboarding-api-dev` | `shipper-dev` | 1 | `dev` | `debug` | automated sync、prune/selfHeal 有効 |
-| prod | `shipper-onboarding-api-prod` | `shipper-prod` | 2 | `prod` | `info` | 手動同期を想定 |
+| dev | `workload-dev` | `workload-dev` | 1 | `dev` | `debug` | automated sync、prune/selfHeal 有効 |
+| prod | `workload-prod` | `workload-prod` | 2 | `prod` | `info` | 手動同期を想定 |
 
 ## image tag の差し替え
 
@@ -125,11 +125,11 @@ tag だけ変える場合は `newTag` を更新します。image registry も変
 ```yaml
 images:
   - name: quay.io/openshift/origin-hello-openshift
-    newName: quay.io/example/shipper-onboarding-api
+    newName: quay.io/example/workload
     newTag: v1.0.0
 ```
 
-## shipper-onboarding-api の実イメージに差し替える
+## 実アプリのイメージに差し替える
 
 実アプリの container image が用意できたら、`apps/workload/overlays/dev/kustomization.yaml` と `apps/workload/overlays/prod/kustomization.yaml` の `images` を変更します。
 
@@ -138,7 +138,7 @@ images:
 ```yaml
 images:
   - name: quay.io/openshift/origin-hello-openshift
-    newName: quay.io/<org>/shipper-onboarding-api
+    newName: quay.io/<org>/<app-image>
     newTag: <tag>
 ```
 

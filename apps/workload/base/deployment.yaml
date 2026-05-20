@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: shipper-onboarding-api
+  name: workload
   labels:
-    app: shipper-onboarding-api
-    app.kubernetes.io/name: shipper-onboarding-api
+    app: workload
+    app.kubernetes.io/name: workload
     app.kubernetes.io/part-of: logistics-platform
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: shipper-onboarding-api
+      app: workload
   template:
     metadata:
       labels:
-        app: shipper-onboarding-api
+        app: workload
     spec:
       containers:
-        - name: shipper-onboarding-api
+        - name: workload
           image: quay.io/openshift/origin-hello-openshift:latest
           ports:
             - containerPort: 8080
@@ -25,7 +25,7 @@ spec:
               name: http
           envFrom:
             - configMapRef:
-                name: shipper-onboarding-api-config
+                name: workload-config
           readinessProbe:
             httpGet:
               path: /

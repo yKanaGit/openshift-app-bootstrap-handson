@@ -1,6 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: shipper-onboarding-api
+  name: workload
 spec:
   replicas: 1
