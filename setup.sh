@@ -80,6 +80,9 @@ wait_for_deployment "openshift-gitops" "openshift-gitops-repo-server" 600
 wait_for_deployment "openshift-gitops" "openshift-gitops-redis" 600
 wait_for_deployment "openshift-gitops" "openshift-gitops-applicationset-controller" 600
 
+echo "Applying Argo CD application namespace RBAC ..."
+oc apply -f "${SCRIPT_DIR}/bootstrap/argocd-app-rbac.yaml"
+
 echo "Applying ApplicationSet manifest ..."
 oc apply -f "${SCRIPT_DIR}/bootstrap/applicationset.yaml"
 

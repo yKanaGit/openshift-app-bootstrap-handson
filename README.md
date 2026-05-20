@@ -29,6 +29,7 @@ Kustomize overlay
 ```text
 bootstrap/
   openshift-gitops-operator.yaml
+  argocd-app-rbac.yaml
   applicationset.yaml
   repo-creds.example.yaml
 apps/
@@ -68,7 +69,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-`setup.sh` は OpenShift GitOps Operator を導入し、`openshift-gitops` namespace の Argo CD 関連 Deployment が利用可能になってから ApplicationSet を適用します。private repo 用の credentials は自動適用しません。
+`setup.sh` は OpenShift GitOps Operator を導入し、`openshift-gitops` namespace の Argo CD 関連 Deployment が利用可能になってから、アプリ配備先 namespace 用の RoleBinding と ApplicationSet を適用します。private repo 用の credentials は自動適用しません。
 
 ## 動作確認
 
@@ -96,8 +97,11 @@ oc get application shipper-onboarding-api-dev -n openshift-gitops -o jsonpath='{
 空の場合は、最新の `bootstrap/applicationset.yaml` を push したうえで再適用します。
 
 ```bash
+oc apply -f bootstrap/argocd-app-rbac.yaml
 oc apply -f bootstrap/applicationset.yaml
 ```
+
+`operationState.message` に `cannot create resource "deployments"` や `cannot create resource "routes"` が出る場合も、`bootstrap/argocd-app-rbac.yaml` を適用してください。これは OpenShift GitOps の application-controller に `shipper-dev` / `shipper-prod` への配備権限を渡すための RoleBinding です。
 
 ## dev / prod の違い
 
