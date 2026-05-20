@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shipper-onboarding-api
+  labels:
+    app: shipper-onboarding-api
+    app.kubernetes.io/name: shipper-onboarding-api
+    app.kubernetes.io/part-of: logistics-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shipper-onboarding-api
+  template:
+    metadata:
+      labels:
+        app: shipper-onboarding-api
+    spec:
+      containers:
+        - name: shipper-onboarding-api
+          image: quay.io/openshift/origin-hello-openshift:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+              name: http
+          envFrom:
+            - configMapRef:
+                name: shipper-onboarding-api-config
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi

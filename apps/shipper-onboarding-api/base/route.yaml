@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: shipper-onboarding-api
+  labels:
+    app: shipper-onboarding-api
+    app.kubernetes.io/name: shipper-onboarding-api
+    app.kubernetes.io/part-of: logistics-platform
+spec:
+  to:
+    kind: Service
+    name: shipper-onboarding-api
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

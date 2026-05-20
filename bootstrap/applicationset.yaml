@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: shipper-onboarding-api
+  namespace: openshift-gitops
+spec:
+  generators:
+    - list:
+        elements:
+          - name: shipper-onboarding-api-dev
+            namespace: shipper-dev
+            path: apps/shipper-onboarding-api/overlays/dev
+      template:
+        spec:
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - CreateNamespace=true
+    - list:
+        elements:
+          - name: shipper-onboarding-api-prod
+            namespace: shipper-prod
+            path: apps/shipper-onboarding-api/overlays/prod
+      template:
+        spec:
+          syncPolicy:
+            syncOptions:
+              - CreateNamespace=true
+  template:
+    metadata:
+      name: '{{name}}'
+      namespace: openshift-gitops
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/yKanaGit/openshift-app-bootstrap-handson.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
