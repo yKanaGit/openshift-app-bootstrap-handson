@@ -33,7 +33,7 @@ bootstrap/
   applicationset.yaml
   repo-creds.example.yaml
 apps/
-  shipper-onboarding-api/
+  workload/
     base/
     overlays/
       dev/
@@ -131,7 +131,7 @@ images:
 
 ## shipper-onboarding-api の実イメージに差し替える
 
-実アプリの container image が用意できたら、`apps/shipper-onboarding-api/overlays/dev/kustomization.yaml` と `apps/shipper-onboarding-api/overlays/prod/kustomization.yaml` の `images` を変更します。
+実アプリの container image が用意できたら、`apps/workload/overlays/dev/kustomization.yaml` と `apps/workload/overlays/prod/kustomization.yaml` の `images` を変更します。
 
 例:
 
@@ -167,6 +167,6 @@ oc apply -f bootstrap/repo-creds.yaml
 OpenShift に適用する前に Kustomize の出力を確認できます。
 
 ```bash
-kustomize build apps/shipper-onboarding-api/overlays/dev
-kustomize build apps/shipper-onboarding-api/overlays/prod
+kustomize build apps/workload/overlays/dev
+kustomize build apps/workload/overlays/prod
 ```

@@ -9,7 +9,7 @@ spec:
         elements:
           - name: shipper-onboarding-api-dev
             namespace: shipper-dev
-            path: apps/shipper-onboarding-api/overlays/dev
+            path: apps/workload/overlays/dev
   template:
     metadata:
       name: '{{name}}'
@@ -41,7 +41,7 @@ spec:
         elements:
           - name: shipper-onboarding-api-prod
             namespace: shipper-prod
-            path: apps/shipper-onboarding-api/overlays/prod
+            path: apps/workload/overlays/prod
   template:
     metadata:
       name: '{{name}}'
