@@ -10,7 +10,8 @@ patchesStrategicMerge:
   - deployment-patch.yaml
 
 images:
-  - name: quay.io/openshift/origin-hello-openshift
+  - name: image-registry.openshift-image-registry.svc:5000/workload/workload
+    newName: image-registry.openshift-image-registry.svc:5000/workload-dev/workload
     newTag: latest
 
 configMapGenerator:

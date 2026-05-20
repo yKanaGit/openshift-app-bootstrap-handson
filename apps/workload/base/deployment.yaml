@@ -5,7 +5,7 @@ metadata:
   labels:
     app: workload
     app.kubernetes.io/name: workload
-    app.kubernetes.io/part-of: logistics-platform
+    app.kubernetes.io/part-of: workload-platform
 spec:
   replicas: 1
   selector:
@@ -18,7 +18,8 @@ spec:
     spec:
       containers:
         - name: workload
-          image: quay.io/openshift/origin-hello-openshift:latest
+          image: image-registry.openshift-image-registry.svc:5000/workload/workload:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               protocol: TCP

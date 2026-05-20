@@ -1,12 +1,11 @@
-apiVersion: v1
-kind: ConfigMap
+apiVersion: image.openshift.io/v1
+kind: ImageStream
 metadata:
-  name: workload-config
+  name: workload
   labels:
     app: workload
     app.kubernetes.io/name: workload
     app.kubernetes.io/part-of: workload-platform
-data:
-  APP_NAME: workload
-  APP_ENV: default
-  LOG_LEVEL: info
+spec:
+  lookupPolicy:
+    local: true

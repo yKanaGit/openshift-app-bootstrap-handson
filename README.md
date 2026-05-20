@@ -2,7 +2,7 @@
 
 このリポジトリは、OpenShift GitOps / Argo CD ApplicationSet と Kustomize を使って、通常の OpenShift コンテナアプリをブートストラップ配備するためのハンズオン用リポジトリです。
 
-題材は汎用的な `workload` です。初期状態ではすぐ動作確認できるように public image の `quay.io/openshift/origin-hello-openshift:latest` を配備します。PostgreSQL、Tekton CI/CD、OpenShift AI、GPU Operator、NFD、LLM Serving、VLM Serving、OpenWebUI 関連の manifest は含めていません。
+題材は汎用的な `workload` です。初期状態では `https://github.com/yKanaGit/Sample-app01.git` のコードを OpenShift BuildConfig でコンテナ化し、OpenShift 内部 ImageStream から Deployment に配備します。PostgreSQL、Tekton CI/CD、OpenShift AI、GPU Operator、NFD、LLM Serving、VLM Serving、OpenWebUI 関連の manifest は含めていません。
 
 ## アーキテクチャ
 
@@ -21,7 +21,14 @@ OpenShift GitOps / Argo CD
 
 Kustomize overlay
   |
-  +--> Deployment / Service / Route / ConfigMap
+  +--> ImageStream / BuildConfig / Deployment / Service / Route / ConfigMap
+
+BuildConfig
+  |
+  +--> GitHub: yKanaGit/Sample-app01 -> Docker build -> ImageStream: workload:latest
+                                             |
+                                             v
+                                       Deployment: workload
 ```
 
 ## ディレクトリ構成
@@ -76,6 +83,8 @@ chmod +x setup.sh
 ```bash
 oc get applications -n openshift-gitops
 oc get applicationsets -n openshift-gitops
+oc get builds -n workload-dev
+oc get imagestream workload -n workload-dev
 oc get pods -n workload-dev
 oc get route -n workload-dev
 ```
@@ -86,7 +95,7 @@ Route URL は次のコマンドで確認できます。
 oc get route workload -n workload-dev -o jsonpath='https://{.spec.host}{"\n"}'
 ```
 
-取得した URL にアクセスすると、初期 image の hello-openshift アプリに到達できます。
+取得した URL にアクセスすると、`Sample-app01` からビルドされたアプリに到達できます。
 
 `workload-dev` が `OutOfSync / Missing` のまま Pod が作成されない場合は、Application に automated sync が入っているか確認します。
 
@@ -110,36 +119,39 @@ oc apply -f bootstrap/applicationset.yaml
 | dev | `workload-dev` | `workload-dev` | 1 | `dev` | `debug` | automated sync、prune/selfHeal 有効 |
 | prod | `workload-prod` | `workload-prod` | 2 | `prod` | `info` | 手動同期を想定 |
 
-## image tag の差し替え
+## GitHub アプリの差し替え
 
-dev/prod の image は overlay ごとに変更します。
-
-```yaml
-images:
-  - name: quay.io/openshift/origin-hello-openshift
-    newTag: latest
-```
-
-tag だけ変える場合は `newTag` を更新します。image registry も変える場合は、`newName` を追加します。
+このリポジトリは、アプリの GitHub repository を OpenShift 上で直接ビルドする構成です。対象 repository は `apps/workload/base/buildconfig.yaml` の `source.git.uri` で指定します。
 
 ```yaml
-images:
-  - name: quay.io/openshift/origin-hello-openshift
-    newName: quay.io/example/workload
-    newTag: v1.0.0
+source:
+  type: Git
+  git:
+    uri: https://github.com/yKanaGit/Sample-app01.git
+    ref: main
 ```
 
-## 実アプリのイメージに差し替える
+別のデモアプリに差し替える場合は、`uri` と `ref` を変更します。Docker strategy を使っているため、対象 repository の root に `Dockerfile` または `Containerfile` が必要です。
 
-実アプリの container image が用意できたら、`apps/workload/overlays/dev/kustomization.yaml` と `apps/workload/overlays/prod/kustomization.yaml` の `images` を変更します。
+BuildConfig は `workload:latest` という ImageStreamTag に出力し、Deployment はその ImageStreamTag を参照します。
+
+```yaml
+output:
+  to:
+    kind: ImageStreamTag
+    name: workload:latest
+```
+
+## 外部 image を使う場合
+
+OpenShift 上でビルドせず、外部 registry の image を直接使う場合は、`apps/workload/base/deployment.yaml` の image を registry image に変更し、`imagestream.yaml` と `buildconfig.yaml` を `base/kustomization.yaml` から外します。
 
 例:
 
 ```yaml
-images:
-  - name: quay.io/openshift/origin-hello-openshift
-    newName: quay.io/<org>/<app-image>
-    newTag: <tag>
+containers:
+  - name: workload
+    image: quay.io/<org>/<app-image>:<tag>
 ```
 
 変更を GitHub に push すると、dev は automated sync により反映されます。prod は本番想定のため、Argo CD UI または CLI で手動同期してください。

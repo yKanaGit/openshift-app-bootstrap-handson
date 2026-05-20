@@ -5,7 +5,7 @@ metadata:
   labels:
     app: workload
     app.kubernetes.io/name: workload
-    app.kubernetes.io/part-of: logistics-platform
+    app.kubernetes.io/part-of: workload-platform
 spec:
   type: ClusterIP
   ports:

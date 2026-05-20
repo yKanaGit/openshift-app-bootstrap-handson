@@ -1,0 +1,23 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: workload
+  labels:
+    app: workload
+    app.kubernetes.io/name: workload
+    app.kubernetes.io/part-of: workload-platform
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: workload:latest
+  source:
+    type: Git
+    git:
+      uri: https://github.com/yKanaGit/Sample-app01.git
+      ref: main
+  strategy:
+    type: Docker
+    dockerStrategy: {}
+  triggers:
+    - type: ConfigChange
