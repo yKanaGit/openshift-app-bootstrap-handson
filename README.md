@@ -87,6 +87,18 @@ oc get route shipper-onboarding-api -n shipper-dev -o jsonpath='https://{.spec.h
 
 取得した URL にアクセスすると、初期 image の hello-openshift アプリに到達できます。
 
+`shipper-onboarding-api-dev` が `OutOfSync / Missing` のまま Pod が作成されない場合は、Application に automated sync が入っているか確認します。
+
+```bash
+oc get application shipper-onboarding-api-dev -n openshift-gitops -o jsonpath='{.spec.syncPolicy}{"\n"}'
+```
+
+空の場合は、最新の `bootstrap/applicationset.yaml` を push したうえで再適用します。
+
+```bash
+oc apply -f bootstrap/applicationset.yaml
+```
+
 ## dev / prod の違い
 
 | 環境 | Application 名 | namespace | replicas | APP_ENV | LOG_LEVEL | 同期方式 |
